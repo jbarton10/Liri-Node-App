@@ -1,4 +1,7 @@
-console.log('this is loaded');
+
+//Getting dotenv extension
+require("dotenv").config({path: "../../.env"})
+
 
 exports.spotify = {
   id: process.env.SPOTIFY_ID,

@@ -1,12 +1,18 @@
-require("dotenv").config()
-var keys = require("./keys.js");
+//Spotify Stuff
+var keys = require("./keys");
 var Spotify = require('node-spotify-api');
-//Files not linking?
-// var spotify = new Spotify(keys.spotify);
+var spotify = new Spotify(keys.spotify);
+
+//Getting Axios
 var axios = require('axios');
-//Getting moment.js in
+
+//Getting moment.js
 var moment = require('moment');
 moment().format();
+
+//Getting File systems
+var fs = require('fs');
+
 
 var userInput = process.argv[2];
 var command = "";
@@ -15,35 +21,40 @@ var command = "";
 if (process.argv.length > 3){
 
     for(var i = 3; i<process.argv.length; i++){
-        command +=process.argv[i];
+        command += " " + process.argv[i];
         
     }
+    command = command.trim();
 }
+console.log()
+liri(userInput, command);
 
 
+function liri(userInput, command){
+    switch(userInput.toLowerCase()) {
+        case "concert-this":
+            concertFunction(command);
+            break;
+    
+        case "spotify-this-song":
+            spotifyFunction(command);
+            break;
+    
+        case "movie-this":
+            movieFunction(command);
+            break;
+    
+        case "do-what-it-says":
+            doFunction();
+            break;
+    
+        default:
+            console.log("Please enter a valid command.");
+            break;
+      }
+    
 
-//Switch case to check input
-switch(userInput.toLowerCase()) {
-    case "concert-this":
-        concertFunction(command);
-        break;
-
-    case "spotify-this-song":
-        spotifyFunction(command);
-        break;
-
-    case "movie-this":
-        movieFunction(command);
-        break;
-
-    case "do-what-it-says":
-        doFunction();
-        break;
-
-    default:
-        console.log("Please enter a valid command.");
-        break;
-  }
+}
 
 
 //Functions
@@ -65,13 +76,22 @@ function concertFunction(artist){
 
 }
 function spotifyFunction(songName){
+    if(songName == ""){
+        songName = "Ace of Base";
+    }
 
-    console.log("Artist(s) " + "");
-    console.log("Song name ");
-    console.log("Link ");
-    console.log("Album ");
+    spotify.search({ type: 'track', query: songName }, function(err, data) {
+        if (err) {
+          return console.log('Error occurred: ' + err);
+        }
+        
 
-    
+      console.log("Artist(s): " + data.tracks.items[0].artists[0].name);
+      console.log("Song name: " + data.tracks.items[0].name);
+      console.log("Link: " + data.tracks.items[0].external_urls.spotify);
+      console.log("Album: " + data.tracks.items[0].album.name);
+  
+      });
 
 }
 function movieFunction(movieName){
@@ -83,7 +103,7 @@ function movieFunction(movieName){
 
 
     axios.get(url).then(function(response){
-        console.log(response.data);
+        
         console.log("Title: " + response.data.Title);
         console.log("Year of Release: " + response.data.Year);
         console.log("IMBD Rating: " + response.data.Rated);
@@ -99,5 +119,27 @@ function movieFunction(movieName){
 
 }
 function doFunction(){
+    fs.readFile("./../../random.txt", "UTF8", function(err, data){
+        if (err) {
+            return console.log(err);
+          }
+          var output = data.split(",");
+          
+
+          if(output[0] == "spotify-this-song"){
+              liri(output[0], output[1]);
+          }
+          else if(output[0] == "movie-this"){
+            liri(output[0], output[1]);
+          }
+          else if(output[0] == "concert-this"){
+            liri(output[0], output[1]);
+          }
+          
+         
+
+    });
+
+
 
 }
